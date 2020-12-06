@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BleuRichard's TicTacToe</title>
+</head>
+<body>
+<style type="text/css">
+    .cell {
+        width: 100px;
+        height: 100px;
+        background-color: limegreen;
+        display: inline-block;
+        border: solid 1px white;
+        vertical-align: middle;
+
+        line-height: 100px;
+        font-size: 50px;
+        text-align: center;
+    }
+
+    a {
+        font-size: 20px;
+    }
+
+    button {
+        color: navy;
+        height: 20px;
+        width: 80px;
+    }
+</style>
+
+<form>
+    <input type="radio" name="" id="userbegin" checked="true"/><a>User Begin</a>
+    <button type="button" id="setchecked" onclick="setcheck()">Checked</button>
+    <button type="button" id="setunchecked" onclick="setuncheck()">Unchecked</button>
+</form>
+<br/>
+
+
+<div id="parentbox"></div>
+
+<script type="text/javascript">
+    let NineBoxValue = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    let CloneList = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    let CalResults = [0, 0, 0, 0, 0, 0, 0, 0]
+    let FindBestCellList = [[-1, -1, 24], [-1, -1, 24], [-1, -1, 24], [-1, -1, 24], [-1, -1, 24],
+        [-1, -1, 24], [-1, -1, 24], [-1, -1, 24], [-1, -1, 24]];
+    let WhoTurn = 0;
+
+    initial();
+
+    function drawcells() {
+        let parentbox = document.getElementById("parentbox");
+
+        parentbox.innerHTML = "";
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.innerText = NineBoxValue[i][j] === -1 ? "X" :
+                    NineBoxValue[i][j] === 1 ? "O" : "";
+                cell.addEventListener("click", () => move(j, i));
+                parentbox.appendChild(cell);
+            }
+            parentbox.appendChild(document.createElement("br"));
+        }
+    }
+
+    function initial() {
+        let setbutton = document.getElementById("userbegin");
+        if (setbutton.checked === true) {
+            WhoTurn = 1;
+        } else {
+            WhoTurn = -1;
+        }
+    }
+
+    function setcheck() {
+        document.getElementById("userbegin").checked = true;
+        WhoTurn = 1;
+    }
+
+    function setuncheck() {
+        document.getElementById("userbegin").checked = false;
+        WhoTurn = -1;
+
+        cpubegin()
+    }
+
+
+    function cloneboxvalue() {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                CloneList[i][j] = NineBoxValue[i][j]
+            }
+        }
+    }
+
+    function findbestcell() {
+        let minvalue = 24;
+        let exchange = 0;
+        cloneboxvalue();
+        FindBestCellList = [[-1, -1, 24], [-1, -1, 24], [-1, -1, 24], [-1, -1, 24], [-1, -1, 24],
+            [-1, -1, 24], [-1, -1, 24], [-1, -1, 24], [-1, -1, 24]];
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (CloneList[i][j] === 0) {
+                    FindBestCellList[i * 3 + j][0] = i;
+                    FindBestCellList[i * 3 + j][1] = j;
+                }
+            }
+        }
+
+        for(let k=0;k<9;k++){
+            cloneboxvalue();
+            if (FindBestCellList[k][0]>-1){
+                CloneList[FindBestCellList[k][0]][FindBestCellList[k][1]] = WhoTurn;
+                FindBestCellList[k][2] = (CloneList[1][1]) * 4 +
+                    (CloneList[0][0] + CloneList[0][2] + CloneList[2][0] + CloneList[2][2]) * 3 +
+                    (CloneList[0][1] + CloneList[1][0] + CloneList[1][2] + CloneList[2][1]) * 2;
+
+            }
+
+            exchange = FindBestCellList[k][2];
+
+            if (exchange < minvalue) {
+                minvalue = exchange;
+            }
+        }
+
+        for(let k=0;k<9;k++){
+            if (FindBestCellList[k][2] === minvalue) {
+                console.log(WhoTurn);
+                console.log(k);
+                console.log(NineBoxValue);
+                console.log(FindBestCellList);
+                return (k);
+            }
+        }
+    }
+
+    function setbestchoice(position) {
+        move(FindBestCellList[position][0], FindBestCellList[position][1]);
+        //console.log(FindBestCellList[position][0]);
+        //console.log(FindBestCellList[position][1]);
+    }
+
+    function judgewin() {
+        CalResults[0] = NineBoxValue[0][0] + NineBoxValue[0][1] + NineBoxValue[0][2];
+        switch (CalResults[0]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[1] = NineBoxValue[1][0] + NineBoxValue[1][1] + NineBoxValue[1][2];
+        switch (CalResults[1]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[2] = NineBoxValue[2][0] + NineBoxValue[2][1] + NineBoxValue[2][2];
+        switch (CalResults[2]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[3] = NineBoxValue[0][0] + NineBoxValue[1][0] + NineBoxValue[2][0];
+        switch (CalResults[3]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[4] = NineBoxValue[0][1] + NineBoxValue[1][1] + NineBoxValue[2][1];
+        switch (CalResults[4]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[5] = NineBoxValue[0][2] + NineBoxValue[1][2] + NineBoxValue[2][2];
+        switch (CalResults[5]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[6] = NineBoxValue[0][0] + NineBoxValue[1][1] + NineBoxValue[2][2];
+        switch (CalResults[6]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+        CalResults[7] = NineBoxValue[0][2] + NineBoxValue[1][1] + NineBoxValue[2][0];
+        switch (CalResults[7]) {
+            case 3:
+                window.alert("Congrats, you won.");
+                WhoTurn=0;
+                break;
+            case -3:
+                window.alert("Sorry, you lost.");
+                WhoTurn=0;
+                break;
+        }
+
+    }
+
+    function cpufirstwin() {
+        //Check Row 0
+        if (CalResults[0] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[0][i] === 0) {
+                    NineBoxValue[0][i] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Row 1
+        if (CalResults[1] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[1][i] === 0) {
+                    NineBoxValue[1][i] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Row 2
+        if (CalResults[2] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[2][i] === 0) {
+                    NineBoxValue[2][i] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Column 0
+        if (CalResults[3] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[i][0] === 0) {
+                    NineBoxValue[i][0] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Column 1
+        if (CalResults[4] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[i][1] === 0) {
+                    NineBoxValue[i][1] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Column 2
+        if (CalResults[5] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[i][2] === 0) {
+                    NineBoxValue[i][2] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Backslash
+        if (CalResults[6] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[0][0] === 0) {
+                    NineBoxValue[0][0] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[1][1] === 0) {
+                    NineBoxValue[1][1] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[2][2] === 0) {
+                    NineBoxValue[2][2] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Slash
+        if (CalResults[7] === -2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[0][2] === 0) {
+                    NineBoxValue[0][2] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[1][1] === 0) {
+                    NineBoxValue[1][1] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[2][0] === 0) {
+                    NineBoxValue[2][0] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    function cpublockwin() {
+        //Check Row 0
+        if (CalResults[0] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[0][i] === 0) {
+                    NineBoxValue[0][i] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Row 1
+        if (CalResults[1] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[1][i] === 0) {
+                    NineBoxValue[1][i] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Row 2
+        if (CalResults[2] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[2][i] === 0) {
+                    NineBoxValue[2][i] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Column 0
+        if (CalResults[3] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[i][0] === 0) {
+                    NineBoxValue[i][0] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Column 1
+        if (CalResults[4] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[i][1] === 0) {
+                    NineBoxValue[i][1] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Column 2
+        if (CalResults[5] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[i][2] === 0) {
+                    NineBoxValue[i][2] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Backslash
+        if (CalResults[6] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[0][0] === 0) {
+                    NineBoxValue[0][0] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[1][1] === 0) {
+                    NineBoxValue[1][1] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[2][2] === 0) {
+                    NineBoxValue[2][2] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        //Check Slash
+        if (CalResults[7] === 2) {
+            for (let i = 0; i < 3; i++) {
+                if (NineBoxValue[0][2] === 0) {
+                    NineBoxValue[0][2] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[1][1] === 0) {
+                    NineBoxValue[1][1] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+
+                if (NineBoxValue[2][0] === 0) {
+                    NineBoxValue[2][0] = WhoTurn;
+                    WhoTurn=1;
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    function cpubegin() {
+        if (WhoTurn === -1) {
+            drawcells();
+            judgewin();
+
+            let blockvalue = cpublockwin();
+
+            if (blockvalue === 0) {
+                let position = findbestcell();
+                //console.log(position)
+                setbestchoice(position);
+                WhoTurn = 1;
+                drawcells(NineBoxValue);
+                judgewin();
+            } else {
+                WhoTurn = 1;
+                drawcells(NineBoxValue);
+                judgewin();
+            }
+        }
+    }
+
+    // Click result
+    function move(x, y) {
+
+        let blockvalue;
+        let position;
+
+        if (NineBoxValue[y][x] === 0) {
+            NineBoxValue[y][x] = WhoTurn;
+            WhoTurn = 0 - WhoTurn;
+            drawcells();
+            judgewin();
+            if(WhoTurn===0){
+                window.alert("This match ended.")
+                drawcells();
+                return 0;
+            }
+
+            if (WhoTurn === -1) {
+                cpufirstwin();
+                judgewin();
+                if(WhoTurn===0){
+                    window.alert("This match ended.")
+                    drawcells();
+                    return 0;
+                }
+                blockvalue = cpublockwin();
+
+                if (blockvalue === 0) {
+                    position = findbestcell();
+                    setbestchoice(position);
+                    WhoTurn = 1;
+                    drawcells(NineBoxValue);
+                    judgewin();
+                    if(WhoTurn===0){
+                        window.alert("This match ended.")
+                        drawcells();
+                        return 0;
+                    }
+                } else {
+                    WhoTurn = 1;
+                    drawcells(NineBoxValue);
+                    judgewin();
+                    if(WhoTurn===0){
+                        window.alert("This match ended.")
+                        drawcells();
+                        return 0;
+                    }
+                }
+            }
+        } else {
+            //window.alert("Selected Cell has already been filled.")
+        }
+
+    }
+
+    drawcells(NineBoxValue);
+
+</script>
+</body>
+</html>
